@@ -59,24 +59,28 @@ Tabs.prototype.show = function (id) {
 
 	var self = this
 		, tab = this.get(id)
+		, current = self.current
 	;
 
 	if (!tab) {
 		throw "could not find the specified tab";
 	}
 
-	if (self.current) {
+	if (current) {
 
-		self.performHide(self.current, function () {
+		self.performHide(current, function () {
+			classes(current.content).add('tabs-hidden');
+			classes(tab.content).remove('tabs-hidden');
 			self.performShow(tab);
 			self.emit('show', tab);
 		});
 
-		self.emit('hide', self.current);
+		self.emit('hide', current);
 
-		classes(self.current.tab).remove('tabs-active');
+		classes(current.tab).remove('tabs-active');
 
 	} else {
+		classes(tab.content).remove('tabs-hidden');
 		self.performShow(tab);
 	}
 
@@ -94,7 +98,9 @@ Tabs.prototype.hide = function (id) {
 		return;
 	}
 
-	this.performHide(tab);
+	this.performHide(tab, function () {
+		classes(tab.content).add('tabs-hidden');
+	});
 	this.emit('hide', tab);
 
 	this.current = null;
@@ -103,8 +109,6 @@ Tabs.prototype.hide = function (id) {
 
 Tabs.prototype.performShow = function (tab, callback) {
 
-	classes(tab.content).remove('tabs-hidden');
-
 	if (callback) {
 		callback();
 	}
@@ -112,8 +116,6 @@ Tabs.prototype.performShow = function (tab, callback) {
 };
 
 Tabs.prototype.performHide = function (tab, callback) {
-
-	classes(tab.content).add('tabs-hidden');
 
 	if (callback) {
 		callback();
