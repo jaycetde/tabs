@@ -1,0 +1,22 @@
+{
+  "name": "tabs",
+  "repo": "JayceTDE/tabs",
+  "description": "Tabs component",
+  "version": "0.0.1",
+  "keywords": [],
+  "dependencies": {
+    "component/each": "*",
+    "component/event": "*",
+    "component/emitter": "*",
+    "component/classes": "*",
+    "component/inherit": "*"
+  },
+  "development": {},
+  "license": "MIT",
+  "scripts": [
+    "index.js"
+  ],
+  "styles": [
+    "tabs.css"
+  ]
+}

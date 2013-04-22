@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<link rel="stylesheet" href="build/build.css" />
+
+</head>
+<body>
+
+<div id="tab1">Tab 1</div>
+<div id="tab2">Tab 2</div>
+<div id="tab3">Tab 3</div>
+
+<div>
+	<div id="content1">Content 1</div>
+	<div id="content2">Content 2</div>
+	<div id="content3">Content 3</div>
+</div>
+
+<script src="build/build.js"></script>
+<script>
+
+var Tabs = require('tabs')
+	, testTabs = new Tabs()
+;
+
+for (var i = 1; i <= 3; i += 1) {
+	testTabs.add('num' + i, document.querySelector('#tab' + i), document.querySelector('#content' + i));
+}
+
+testTabs.show('num1');
+
+</script>
+
+</body>
+</html>
