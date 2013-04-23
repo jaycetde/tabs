@@ -68,19 +68,17 @@ Tabs.prototype.show = function (id) {
 
 	if (current) {
 
-		self.performHide(current, function () {
-			classes(current.content).add('tabs-hidden');
-			classes(tab.content).remove('tabs-hidden');
-			self.performShow(tab);
-			self.emit('show', tab);
-		});
-
-		self.emit('hide', current);
+		if (self.performTransition) {
+			self.performTransition(current, tab);
+		} else {
+			self.performHide(current, function () {
+				self.performShow(tab);
+			});
+		}
 
 		classes(current.tab).remove('tabs-active');
 
 	} else {
-		classes(tab.content).remove('tabs-hidden');
 		self.performShow(tab);
 	}
 
@@ -98,16 +96,17 @@ Tabs.prototype.hide = function (id) {
 		return;
 	}
 
-	this.performHide(tab, function () {
-		classes(tab.content).add('tabs-hidden');
-	});
-	this.emit('hide', tab);
+	this.performHide(tab);
 
 	this.current = null;
 
 };
 
 Tabs.prototype.performShow = function (tab, callback) {
+
+	classes(tab.content).remove('tabs-hidden');
+
+	this.emit('show', tab);
 
 	if (callback) {
 		callback();
@@ -116,6 +115,10 @@ Tabs.prototype.performShow = function (tab, callback) {
 };
 
 Tabs.prototype.performHide = function (tab, callback) {
+	
+	classes(tab.content).add('tabs-hidden');
+
+	this.emit('hide', tab);
 
 	if (callback) {
 		callback();
