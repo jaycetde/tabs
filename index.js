@@ -7,16 +7,18 @@ var events = require('event')
 
 module.exports = Tabs;
 
-function Tabs() {
+function Tabs(data) {
 
     if (!(this instanceof Tabs)) {
-        return new Tabs();
+        return new Tabs(data);
     }
     
     Emitter.call(this);
-
-    this.tabs = [];
+    
+    this.tabs = {};
     this.current = null;
+    
+    data && this.data(data);
 
 }
 
@@ -26,27 +28,32 @@ Tabs.prototype.get = function (i) {
     return this.tabs[i];
 };
 
-Tabs.prototype.add = function (tabEl, contentEl, init) {
-
-    if (!tabEl || !contentEl) {
-        throw "a required argument is missing";
+Tabs.prototype.data = function (data) {
+    for (var id in data) {
+        if (data.hasOwnProperty(id)) {
+            this.add(id, data[id]);
+        }
     }
-    
-    var tab = {
-        tab: tabEl
-      , tabClasses: classes(tabEl)
-      , content: contentEl
-      , contentClasses: classes(contentEl)
-      , init: init
-      , initialized: false
-    }
+};
 
-    tab.tabClasses.add('tabs-tab');
-    tab.contentClasses.add('tabs-content').add('hidden');
-    
-    events.bind(tabEl, 'click', this.show.bind(this, tab));
+Tabs.prototype.default = function (tab) {
+    this.default = typeof tab === 'string' ? this.tabs[tab] : tab;
+    !this.current && this.show(this.default);
+};
 
-    this.tabs.push(tab);
+Tabs.prototype.add = function (id, tab) {
+    
+    tab.id = id;
+    tab.tabElClasses = classes(tab.tabEl);
+    tab.contentElClasses = classes(tab.contentEl);
+    tab.initialized = false;
+
+    tab.tabElClasses.add('tabs-tab');
+    tab.contentElClasses.add('tabs-content').add('hidden');
+    
+    events.bind(tab.tabEl, 'click', this.show.bind(this, tab));
+
+    this.tabs[id] = tab;
     
     this.emit('add', tab);
 
@@ -60,7 +67,7 @@ Tabs.prototype.show = function (tab) {
       , current = self.current
     ;
     
-    tab = typeof tab === 'number' ? self.tabs[tab] : tab;
+    tab = typeof tab === 'string' ? self.tabs[tab] : tab;
     
     if (!tab) {
         return;
@@ -76,7 +83,7 @@ Tabs.prototype.show = function (tab) {
             });
         }
 
-       current.tabClasses.remove('tabs-active');
+       current.tabElClasses.remove('tabs-active');
 
     } else {
         self.performShow(tab);
@@ -84,7 +91,7 @@ Tabs.prototype.show = function (tab) {
 
     self.current = tab;
 
-    tab.tabClasses.add('tabs-active');
+    tab.tabElClasses.add('tabs-active');
     
     if (!tab.initialized) {
         tab.init && tab.init.call(self, tab);
@@ -95,8 +102,7 @@ Tabs.prototype.show = function (tab) {
 
 Tabs.prototype.hide = function (tab) {
 
-    tab = typeof tab === 'number' ? self.tabs[tab] : tab;
-    tab = tab || this.current;
+    tab = (typeof tab === 'string' ? self.tabs[tab] : tab) || this.current;
 
     if (!tab) {
         return;
@@ -105,12 +111,14 @@ Tabs.prototype.hide = function (tab) {
     this.performHide(tab);
 
     this.current = null;
+    
+    this.default && this.show(this.default);
 
 };
 
 Tabs.prototype.performShow = function (tab, callback) {
 
-    tab.contentClasses.remove('hidden');
+    tab.contentElClasses.remove('hidden');
 
     this.emit('show', tab);
 
@@ -120,7 +128,7 @@ Tabs.prototype.performShow = function (tab, callback) {
 
 Tabs.prototype.performHide = function (tab, callback) {
 
-    tab.contentClasses.add('hidden');
+    tab.contentElClasses.add('hidden');
 
     this.emit('hide', tab);
 

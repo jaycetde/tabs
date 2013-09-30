@@ -25,10 +25,12 @@ var Tabs = require('tabs')
 ;
 
 for (var i = 1; i <= 3; i += 1) {
-	testTabs.add(document.querySelector('#tab' + i), document.querySelector('#content' + i), function (tab) {
-        console.log('Initialized: ', tab.tab.innerHTML);
-    });
+	testTabs.add('num' + i, { tabEl: document.querySelector('#tab' + i), contentEl: document.querySelector('#content' + i), init: function (tab) {
+        console.log('Initialized: ', tab.tabEl.innerHTML);
+    }});
 }
+    
+    testTabs.default('num1');
 
 </script>
 
