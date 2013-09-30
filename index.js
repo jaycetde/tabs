@@ -1,71 +1,69 @@
 'use strict';
 
-var each = require('each')
-    , events = require('event')
-    , Emitter = require('emitter')
-    , classes = require('classes')
-    , inherit = require('inherit')
+var events = require('event')
+  , Emitter = require('emitter')
+  , classes = require('classes')
 ;
 
 module.exports = Tabs;
 
-function Tabs(tabs) {
+function Tabs() {
 
     if (!(this instanceof Tabs)) {
-        return new Tabs(tabs);
+        return new Tabs();
     }
+    
+    Emitter.call(this);
 
-    var self = this;
-
-    if (tabs) {
-        each(tabs, function (tab) {
-            self.add(tab.id, tab.tab, tab.content);
-        });
-    }
-
-    this.tabs = {};
+    this.tabs = [];
     this.current = null;
 
 }
 
-inherit(Tabs, Emitter);
+Tabs.prototype = new Emitter();
 
-Tabs.prototype.get = function (id) {
-
-    return this.tabs[id];
-
+Tabs.prototype.get = function (i) {
+    return this.tabs[i];
 };
 
-Tabs.prototype.add = function (id, tab, content) {
+Tabs.prototype.add = function (tabEl, contentEl, init) {
 
-    if (!id || !tab || !content) {
+    if (!tabEl || !contentEl) {
         throw "a required argument is missing";
     }
+    
+    var tab = {
+        tab: tabEl
+      , tabClasses: classes(tabEl)
+      , content: contentEl
+      , contentClasses: classes(contentEl)
+      , init: init
+      , initialized: false
+    }
 
-    classes(tab).add('tabs-tab');
-    classes(content).add('tabs-content').add('tabs-hidden');
+    tab.tabClasses.add('tabs-tab');
+    tab.contentClasses.add('tabs-content').add('hidden');
+    
+    events.bind(tabEl, 'click', this.show.bind(this, tab));
 
-    var tab = this.tabs[id] = {
-        id: id,
-        tab: tab,
-        content: content
-    };
-
+    this.tabs.push(tab);
+    
     this.emit('add', tab);
 
     return tab;
 
 };
 
-Tabs.prototype.show = function (id) {
+Tabs.prototype.show = function (tab) {
 
     var self = this
-        , tab = this.get(id)
-        , current = self.current
+      , current = self.current
     ;
-
+    
+    tab = typeof tab === 'number' ? self.tabs[tab] : tab;
+    
     if (!tab) {
-        throw "could not find the specified tab";
+        return;
     }
 
     if (current) {
@@ -78,7 +76,7 @@ Tabs.prototype.show = function (id) {
             });
         }
 
-        classes(current.tab).remove('tabs-active');
+       current.tabClasses.remove('tabs-active');
 
     } else {
         self.performShow(tab);
@@ -86,13 +84,19 @@ Tabs.prototype.show = function (id) {
 
     self.current = tab;
 
-    classes(tab.tab).add('tabs-active');
+    tab.tabClasses.add('tabs-active');
+    
+    if (!tab.initialized) {
+        tab.init && tab.init.call(self, tab);
+        tab.initialized = true;
+    }
 
 };
 
-Tabs.prototype.hide = function (id) {
+Tabs.prototype.hide = function (tab) {
 
-    var tab = id ? this.get(id) : this.current;
+    tab = typeof tab === 'number' ? self.tabs[tab] : tab;
+    tab = tab || this.current;
 
     if (!tab) {
         return;
@@ -106,24 +110,20 @@ Tabs.prototype.hide = function (id) {
 
 Tabs.prototype.performShow = function (tab, callback) {
 
-    classes(tab.content).remove('tabs-hidden');
+    tab.contentClasses.remove('hidden');
 
     this.emit('show', tab);
 
-    if (callback) {
-        callback();
-    }
+    callback && callback();
 
 };
 
 Tabs.prototype.performHide = function (tab, callback) {
 
-    classes(tab.content).add('tabs-hidden');
+    tab.contentClasses.add('hidden');
 
     this.emit('hide', tab);
 
-    if (callback) {
-        callback();
-    }
+    callback && callback();
 
 };

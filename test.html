@@ -21,14 +21,14 @@
 <script>
 
 var Tabs = require('tabs')
-	, testTabs = new Tabs()
+  , testTabs = new Tabs()
 ;
 
 for (var i = 1; i <= 3; i += 1) {
-	testTabs.add('num' + i, document.querySelector('#tab' + i), document.querySelector('#content' + i));
+	testTabs.add(document.querySelector('#tab' + i), document.querySelector('#content' + i), function (tab) {
+        console.log('Initialized: ', tab.tab.innerHTML);
+    });
 }
-
-testTabs.show('num1');
 
 </script>
 

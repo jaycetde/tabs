@@ -2,14 +2,12 @@
   "name": "tabs",
   "repo": "JayceTDE/tabs",
   "description": "Tabs component",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "keywords": [],
   "dependencies": {
-    "component/each": "*",
     "component/event": "*",
     "component/emitter": "*",
-    "component/classes": "*",
-    "component/inherit": "*"
+    "component/classes": "*"
   },
   "development": {},
   "license": "MIT",
